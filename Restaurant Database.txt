@@ -1,8 +1,4 @@
 
-Matthew Maceachern <19mam37@queensu.ca>
-11:26 AM (2 hours ago)
-to me
-
 drop database if exists restaurant;
 
 create database restaurant;
