@@ -1,35 +1,419 @@
-  create table customers(
-  	email varchar(30) not null,
-    name varchar(20) not null,
-    deliveryAddress varchar(40),
-    primary key(email)
-  );
-  
-  
-  create table orders(
-  	ID int(5) not null,
-    price decimal(4,2),
-    deliveryTime time, 
-    placementTime time,
-    tip decimal(4,2),
-    primary key(ID)
-  );
-  
-  create table food(
-  	name varChar(20) not null, -- Primary Key
-    price decimal(4,2) not null, 
-    primary key(name)
-  );
-  
-  create table restaurant(
-      Name varchar(20) not null, -- Foreign Key
-      URL varchar(60), 
-      Address varchar(40),
-      credit decimal(6,2),
-      cellNum int(9),
-      primary key(Name)
-  );
-  
-  
-  
-  
+
+Matthew Maceachern <19mam37@queensu.ca>
+11:26 AM (2 hours ago)
+to me
+
+drop database if exists restaurant;
+
+create database restaurant;
+
+use restaurant;
+
+
+create table customerAccount(
+
+    emailAddress varchar(100),
+
+    firstName varchar(100),
+
+    lastName varchar(100),
+
+    cellNum char(10),
+
+    streetAddress varchar(100),
+
+    city varchar(100),
+
+    pc char(10),
+
+    creditAmt decimal(6, 2),
+
+    primary key (emailAddress));
+
+
+create table foodOrder(
+
+orderID integer,
+
+totalPrice decimal(6,2),
+
+tip decimal(6, 2),
+
+    orderDate date,
+
+primary key (orderID));
+
+
+create table food (
+
+name varchar(100),
+
+    orderDate date,
+
+primary key (name));
+
+
+create table restaurant(
+
+name varchar(100),
+
+streetAddress varchar(100),
+
+city varchar(100),
+
+pc char(10),
+
+url varchar(200),
+
+primary key (name));
+
+
+create table employee(
+
+ID integer,
+
+firstName varchar(100),
+
+lastName varchar(100),
+
+emailAddress varchar(100),
+
+    restaurantName varchar(100),
+
+primary key (ID),
+
+    foreign key(restaurantName) references restaurant(name));
+
+
+create table manager(
+
+empid integer primary key,
+
+foreign key (empid) references employee(ID) on delete cascade);
+
+
+create table serverStaff(
+
+empid integer primary key,
+
+foreign key (empid) references employee(ID) on delete cascade);
+
+
+create table chef(
+
+empid integer primary key,
+
+foreign key (empid) references employee(ID) on delete cascade);
+
+
+create table deliveryPerson(
+
+empid integer primary key,
+
+foreign key (empid) references employee(ID) on delete cascade);
+
+
+create table payment(
+
+customerEmail varchar(100),
+
+dates date not null,
+
+paymentAmount decimal(6,2) not null,
+
+primary key (customerEmail, dates),
+
+foreign key (customerEmail) references customerAccount(emailAddress) on delete cascade);
+
+
+create table shift(
+
+empID integer not null,
+
+day varchar(15) not null,
+
+startTime time not null,
+
+endTime time not null,
+
+primary key (empID, day),
+
+foreign key (empID) references employee(ID) on delete cascade);
+
+
+create table chefCredentials (
+
+empID integer not null,
+
+cred varchar(30),
+
+primary key (empID, cred),
+
+foreign key (empID) references employee(ID) on delete cascade);
+
+
+create table orderPlacement(
+
+customerEmail varchar(100) not null,
+
+orderID integer not null,
+
+restaurant varchar(100) not null,
+
+orderTime time,
+
+primary key (customerEmail, orderID, restaurant),
+
+foreign key (customerEmail) references customerAccount(emailAddress) on delete cascade,
+
+foreign key (orderID) references foodOrder(orderID) on delete cascade,
+
+foreign key (restaurant) references restaurant(name) on delete cascade);
+
+
+create table relatedTo(
+
+customer varchar(100) not null,
+
+employee integer not null,
+
+relationship varchar(100),
+
+primary key (customer, employee),
+
+foreign key (customer) references customerAccount(emailAddress) on delete cascade,
+
+foreign key (employee) references employee(ID) on delete cascade);
+
+
+create table menu(
+
+restaurant varchar(100) not null,
+
+food varchar(100) not null,
+
+price decimal(6, 2),
+
+primary key (restaurant, food),
+
+foreign key (restaurant) references restaurant(name) on delete cascade,
+
+foreign key (food) references food (name) on delete cascade);
+
+
+create table foodItemsinOrder(
+
+orderID integer not null,
+
+food varchar(100) not null,
+
+primary key (orderID, food),
+
+foreign key (orderID) references foodOrder(orderID) on delete cascade,
+
+foreign key (food) references food(name) on delete cascade);
+
+
+create table delivery(
+
+orderID integer not null,
+
+deliveryPerson integer not null,
+
+deliveryTime time,
+
+primary key (orderID, deliveryPerson),
+
+foreign key (orderID) references foodOrder(orderID) on delete cascade,
+
+foreign key (deliveryPerson) references employee(id) on delete cascade);
+
+
+create table worksAt(
+
+employeeID integer not null,
+
+restaurant varchar(100) not null,
+
+primary key (employeeID, restaurant),
+
+foreign key (employeeID) references employee(ID) on delete cascade,
+
+foreign key (restaurant) references restaurant(name) on delete cascade);
+
+   
+
+-- Insert values into customerAccount table
+
+INSERT INTO customerAccount (emailAddress, firstName, lastName, cellNum, streetAddress, city, pc, creditAmt)
+
+VALUES ('john@example.com', 'John', 'Doe', '1234567890', '123 Main St', 'Anytown', 'A1B2C3', 100.00),
+
+('jim@example.com', 'Jim', 'Jim', '123456789', '123 Side St', 'This Town', 'A2B2C3', 200.00),
+
+('doe@example.com', 'Doe', 'John', '12345678', '13 Side St', 'This Town', 'A3B2C3', 300.00),
+
+('tim@example.com', 'Tim', 'Bill', '12345678', '1223 Side St', 'This Town', 'A4B2C3', 400.00)
+
+;
+
+
+-- Insert values into foodOrder table
+
+INSERT INTO foodOrder (orderID, totalPrice, tip, orderDate)
+
+VALUES (1, 25.99, 5.00, '2023-04-05'),
+
+ (2, 26.50, 5.00, '2023-04-06'),
+
+ (4, 27.99, 5.00, '2023-04-06'),
+
+ (3, 28.99, 5.00, '2023-04-07');
+
+
+-- Insert values into food table
+
+INSERT INTO food (name, orderDate)
+
+VALUES ('Pepperoni Pizza', '2023-04-05'),
+
+('Burger', '2023-04-06'),
+
+('Fries', '2023-04-06');
+
+
+
+-- Insert data into the restaurant table
+
+INSERT INTO restaurant (name, streetAddress, city, pc, url)
+
+VALUES ('The Fancy Restaurant', '123 Main St', 'New York', '10001', 'http://www.fancyrestaurant.com');
+
+
+-- Insert data into the employee table
+
+INSERT INTO employee (ID, firstName, lastName, emailAddress, restaurantName)
+
+VALUES
+
+    (1, 'John', 'Doe', 'john@example.com', 'The Fancy Restaurant'),
+
+    (2, 'Jane', 'Smith', 'jane.smith@example.com', 'The Fancy Restaurant'),
+
+    (3, 'Tim', 'Bob', 'timms@example.com', 'The Fancy Restaurant'),
+
+    (4, 'Doe', 'Joe', 'does@example.com', 'The Fancy Restaurant');
+
+
+-- Insert data into the manager table
+
+INSERT INTO manager (empid)
+
+VALUES (1);
+
+
+-- Insert data into the serverStaff table
+
+INSERT INTO serverStaff (empid)
+
+VALUES (2);
+
+
+-- Insert data into the chef table
+
+INSERT INTO chef (empid)
+
+VALUES (1);
+
+
+-- Insert data into the deliveryPerson table
+
+INSERT INTO deliveryPerson (empid)
+
+VALUES (2), (3);
+
+
+-- Insert data into the payment table
+
+INSERT INTO payment (customerEmail, dates, paymentAmount)
+
+VALUES ('john@example.com', '2023-04-01', 25.00),
+
+ ('jim@example.com', '2023-04-02', 25.00),
+
+ ('doe@example.com', '2023-04-03', 25.00);
+
+
+
+-- Insert data into the shift table
+
+INSERT INTO shift (empID, day, startTime, endTime)
+
+VALUES (1, 'Monday', '09:00:00', '17:00:00'),
+
+(2, 'Monday', '10:00:00', '19:00:00'),
+
+(3, 'Monday', '06:00:00', '12:00:00');
+
+
+-- Insert data into the chefCredentials table
+
+INSERT INTO chefCredentials (empID, cred)
+
+VALUES (1, 'Certified Chef');
+
+
+-- Insert data into the orderPlacement table
+
+INSERT INTO orderPlacement (customerEmail, orderID, restaurant, orderTime)
+
+VALUES ('john@example.com', 1, 'The Fancy Restaurant', '14:00:00'),
+
+('doe@example.com', 2, 'The Fancy Restaurant', '14:00:00'),
+
+('jim@example.com', 3, 'The Fancy Restaurant', '14:00:00'),
+
+('tim@example.com', 2, 'The Fancy Restaurant', '14:00:00');
+
+
+-- Insert data into the relatedTo table
+
+INSERT INTO relatedTo (customer, employee, relationship)
+
+VALUES ('john@example.com', 1, 'Friend');
+
+
+-- Insert data into the menu table
+
+INSERT INTO menu (restaurant, food, price)
+
+VALUES ('The Fancy Restaurant', 'Pepperoni Pizza', 12.99);
+
+
+-- Insert data into the foodItemsinOrder table
+
+INSERT INTO foodItemsinOrder (orderID, food)
+
+VALUES (1, 'Pepperoni Pizza'),
+
+(2, 'Burger'),
+
+(3, 'Fries');
+
+
+-- Insert data into the delivery table
+
+INSERT INTO delivery (orderID, deliveryPerson, deliveryTime)
+
+VALUES (1, 2, '15:30:00'),
+
+(2, 2, '15:30:00'),
+
+(3, 3, '15:30:00');
+
+
+-- Insert data into the worksAt table
+
+INSERT INTO worksAt (employeeID, restaurant)
+
+VALUES (1, 'The Fancy Restaurant');
