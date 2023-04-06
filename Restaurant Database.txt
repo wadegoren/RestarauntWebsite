@@ -1,0 +1,35 @@
+  create table customers(
+  	email varchar(30) not null,
+    name varchar(20) not null,
+    deliveryAddress varchar(40),
+    primary key(email)
+  );
+  
+  
+  create table orders(
+  	ID int(5) not null,
+    price decimal(4,2),
+    deliveryTime time, 
+    placementTime time,
+    tip decimal(4,2),
+    primary key(ID)
+  );
+  
+  create table food(
+  	name varChar(20) not null, -- Primary Key
+    price decimal(4,2) not null, 
+    primary key(name)
+  );
+  
+  create table restaurant(
+      Name varchar(20) not null, -- Foreign Key
+      URL varchar(60), 
+      Address varchar(40),
+      credit decimal(6,2),
+      cellNum int(9),
+      primary key(Name)
+  );
+  
+  
+  
+  
