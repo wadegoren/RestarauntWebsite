@@ -1,11 +1,7 @@
 <!DOCTYPE html>
 <h1> Wade's World </h1>
 
-<?php
-include 'connectdb.php';
-?>
-
-<p>Welcome to Wade's Restaurant</p>
+<h2>Welcome to Wade's Restaurant</h2>
 
 <body>
     <form method="POST" action="inputDate.php">
@@ -15,7 +11,87 @@ include 'connectdb.php';
     </form>
 
     <button onclick="showPopup()">Add Customer</button>
+
+    <h2>Order Information:</h2>
   </body>
+
+<?php 
+include 'connectdb.php';
+$sql = "SELECT DISTINCT orderDate as dateOrder, count(orderDate) AS numOrders
+FROM foodOrder 
+GROUP BY dateOrder
+";
+
+$stmt = $conn->prepare($sql);
+$stmt->execute();
+$results = $stmt->fetchAll(); 
+// display results
+if ($stmt->rowCount() > 0) {
+  echo "<table><tr><th>Order Date</th><th>Number of Orders</th></tr>";
+  foreach ($results as $row) {
+      echo "<tr><td>".$row["dateOrder"]."</td><td>".$row["numOrders"]."</td></tr>";
+  }
+  echo "</table>";
+} else {
+  echo "No food orders found";
+}
+?>
+
+<?php
+$query = "SELECT firstName, lastName FROM employee";
+
+// Execute the query
+$random = $conn->prepare($query);
+$random->execute();
+$employees = $random->fetchAll(); 
+
+
+// Create a dropdown menu with the list of employees
+echo "<form method='POST' placeholder='Select'>";
+echo "<select name='employee_name' style='width: 200px; height: 30px'>";
+foreach ($employees as $row) {
+    $employee_name = $row['firstName'] . ' ' . $row['lastName'];
+    echo "<option value='" . $employee_name . "'>" . $employee_name . "</option>";
+}
+echo "</select>";
+echo "<input type='submit' name='submit' value='Select Employee'>";
+echo "</form>";
+
+// Handle form submission
+if(isset($_POST['submit'])) {
+    // Retrieve the selected employee name from the dropdown menu
+    $selected_employee_name = $_POST['employee_name'];
+    // Retrieve the employee ID based on their name
+    $query = "SELECT ID FROM employee WHERE firstName = :firstName AND lastName = :lastName";
+    $stmt = $conn->prepare($query);
+    $names = explode(' ', $selected_employee_name);
+    $stmt->bindParam(':firstName', $names[0]);
+    $stmt->bindParam(':lastName', $names[1]);
+    $stmt->execute();
+    $result = $stmt->fetch(PDO::FETCH_ASSOC);
+    $employee_id = $result['ID'];
+  
+    // Retrieve the employee's schedule for Monday to Friday
+    $query = "SELECT employee.firstName, employee.lastName, shift.day, shift.startTime, shift.endTime
+    FROM employee
+    INNER JOIN shift ON employee.ID = shift.empID
+    WHERE employee.ID = :employee_id AND shift.day NOT IN ('Saturday', 'Sunday')
+    ORDER BY shift.day ASC";
+    $stmt = $conn->prepare($query);
+    $stmt->bindParam(':employee_id', $employee_id);
+    $stmt->execute();
+    $schedule = $stmt->fetchAll();
+  
+    // Display the schedule in a table format
+    echo "<table>";
+    echo "<tr><th>Day</th><th>Start Time</th><th>End Time</th></tr>";
+    foreach ($schedule as $row) {
+        echo "<tr><td>" . $row['day'] . "</td><td>" . $row['startTime'] . "</td><td>" . $row['endTime'] . "</td></tr>";
+    }
+    echo "</table>";
+}
+?>
+
 
   <script>
     function showPopup() {
@@ -49,11 +125,10 @@ include 'connectdb.php';
       padding: 20px;
       border-radius: 5px;
     }
+
   </style>
-</head>
 <body>
 
-  
   <div id="popup">
     <div id="popup-content">
       <h2>Add Customer</h2>
